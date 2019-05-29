@@ -5,8 +5,12 @@ from environments import Bandit
 
 
 """
+====================================
 AGENTS
+====================================
 """
+
+
 def simple_bandit(k, ax, eps=0.0, a=0.0, Q1=0.0, c=0.0, nonstationary=False, n_runs=2000, timesteps=1000, plot_on=True):
     """
     A simple bandit algorithm (pg. 54)
@@ -193,8 +197,12 @@ def gradient_bandit(k, ax, a=0.1, nonstationary=False, kill_baseline=False, n_ru
 
 
 """
+====================================
 EXERCISES AND FIGURES
+====================================
 """
+
+
 """
 Fig. 2.2: A simple bandit algorithm (pg. 54) for recreating Fig. 2.2 on pg. 51
 """
