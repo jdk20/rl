@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from environments import Bandit
 
 
-def simple_bandit(k, ax, eps=0.0, a=0.0, Q1=0.0, c=0.0, nonstationary=False, n_runs=2000, timesteps=1000):
+def simple_bandit(k, ax, eps=0.0, a=0.0, Q1=0.0, c=0.0, nonstationary=False, n_runs=2000, timesteps=1000, plot_on=True):
     """
     A simple bandit algorithm (pg. 54)
     Estimates action-values (Q) using incremental sample averages Q = (1/N)*sum_{i=n}^{N}{Ri} == Q + (1/N)(R - Q)
@@ -85,24 +85,27 @@ def simple_bandit(k, ax, eps=0.0, a=0.0, Q1=0.0, c=0.0, nonstationary=False, n_r
             else:
                 metrics['optimal_action'][n, t] = 0
 
-    # Plotting, also not part of the algorithm
-    tt = np.arange(0, timesteps, 1)
+    if plot_on:
+        # Plotting, also not part of the algorithm
+        tt = np.arange(0, timesteps, 1)
 
-    ax[0].plot(tt, np.mean(metrics['reward'], axis=0), '-', label='eps=' + str(eps))
-    ax[0].set_ylabel('Average reward')
-    ax[0].legend()
+        ax[0].plot(tt, np.mean(metrics['reward'], axis=0), '-', label='eps=' + str(eps))
+        ax[0].set_ylabel('Average reward')
+        ax[0].legend()
 
-    ax[1].plot(tt, np.mean(metrics['optimal_action'], axis=0), '-', label='eps=' + str(eps))
-    ax[1].set_xlabel('Timesteps')
-    ax[1].set_ylabel('% Optimal action')
-    ax[1].legend()
+        ax[1].plot(tt, np.mean(metrics['optimal_action'], axis=0), '-', label='eps=' + str(eps))
+        ax[1].set_xlabel('Timesteps')
+        ax[1].set_ylabel('% Optimal action')
+        ax[1].legend()
 
-    return ax
+        return ax, metrics
+    else:
+        return metrics
 
 
-def gradient_bandit(k, ax, a=0.1, nonstationary=False, kill_baseline = False, n_runs=2000, timesteps=1000):
+def gradient_bandit(k, ax, a=0.1, nonstationary=False, kill_baseline=False, n_runs=2000, timesteps=1000, plot_on=True):
     """
-    The gradient bandit algorithm (pg. 59)
+    The gradient bandit algorithm (pg. 59), essentially stochastic gradient ascent.
 
     H (array): Preference of selecting an action
     pi (array): Probability of selecting an action (constructed by applying softmax() to H)
@@ -164,19 +167,22 @@ def gradient_bandit(k, ax, a=0.1, nonstationary=False, kill_baseline = False, n_
             else:
                 metrics['optimal_action'][n, t] = 0
 
-    # Plotting, also not part of the algorithm
-    tt = np.arange(0, timesteps, 1)
+    if plot_on:
+        # Plotting, also not part of the algorithm
+        tt = np.arange(0, timesteps, 1)
 
-    ax[0].plot(tt, np.mean(metrics['reward'], axis=0), '-', label='a=' + str(a))
-    ax[0].set_ylabel('Average reward')
-    ax[0].legend()
+        ax[0].plot(tt, np.mean(metrics['reward'], axis=0), '-', label='a=' + str(a))
+        ax[0].set_ylabel('Average reward')
+        ax[0].legend()
 
-    ax[1].plot(tt, np.mean(metrics['optimal_action'], axis=0), '-', label='a=' + str(a))
-    ax[1].set_xlabel('Timesteps')
-    ax[1].set_ylabel('% Optimal action')
-    ax[1].legend()
+        ax[1].plot(tt, np.mean(metrics['optimal_action'], axis=0), '-', label='a=' + str(a))
+        ax[1].set_xlabel('Timesteps')
+        ax[1].set_ylabel('% Optimal action')
+        ax[1].legend()
 
-    return ax
+        return ax, metrics
+    else:
+        return metrics
 
 
 """
@@ -186,9 +192,9 @@ if False:
     k = 10                              # Number of actions (arms)
 
     f, ax = plt.subplots(2, 1)
-    ax = simple_bandit(k, ax, eps=0.0)
-    ax = simple_bandit(k, ax, eps=0.01)
-    ax = simple_bandit(k, ax, eps=0.1)
+    ax, _ = simple_bandit(k, ax, eps=0.0)
+    ax, _ = simple_bandit(k, ax, eps=0.01)
+    ax, _ = simple_bandit(k, ax, eps=0.1)
     plt.show()
 
 
@@ -204,8 +210,8 @@ if False:
     timesteps = 10000                    # Number of timesteps for one run
 
     f, ax = plt.subplots(2, 1)
-    ax = simple_bandit(k, ax, eps=eps, n_runs=n_runs, timesteps=timesteps, nonstationary=True)
-    ax = simple_bandit(k, ax, eps=eps, a=0.1, n_runs=n_runs, timesteps=timesteps, nonstationary=True)
+    ax, _ = simple_bandit(k, ax, eps=eps, n_runs=n_runs, timesteps=timesteps, nonstationary=True)
+    ax, _ = simple_bandit(k, ax, eps=eps, a=0.1, n_runs=n_runs, timesteps=timesteps, nonstationary=True)
     plt.show()
 
 
@@ -222,8 +228,8 @@ if False:
     n_runs = 2000
 
     f, ax = plt.subplots(2, 1)
-    ax = simple_bandit(k, ax, eps=0, a=0.1, Q1=5, n_runs=n_runs, nonstationary=False)
-    ax = simple_bandit(k, ax, eps=0.1, a=0.1, Q1=0, n_runs=n_runs, nonstationary=False)
+    ax, _ = simple_bandit(k, ax, eps=0, a=0.1, Q1=5, n_runs=n_runs, nonstationary=False)
+    ax, _ = simple_bandit(k, ax, eps=0.1, a=0.1, Q1=0, n_runs=n_runs, nonstationary=False)
     plt.show()
 
 
@@ -237,27 +243,88 @@ if False:
     n_runs = 2000
 
     f, ax = plt.subplots(2, 1)
-    ax = simple_bandit(k, ax, c=2, a=0, n_runs=n_runs, nonstationary=False)
-    ax = simple_bandit(k, ax, eps=0.1, a=0, n_runs=n_runs, nonstationary=False)
+    ax, _ = simple_bandit(k, ax, c=2, a=0, n_runs=n_runs, nonstationary=False)
+    ax, _ = simple_bandit(k, ax, eps=0.1, a=0, n_runs=n_runs, nonstationary=False)
     plt.show()
 
 
 """
 Fig. 2.5: Gradient algorithm (pg. 59) for recreating Fig. 2.5 on pg. 60 (Gradient bandit)
 """
-if True:
+if False:
     k = 10                              # Number of actions (arms)
 
     n_runs = 100
 
     f, ax = plt.subplots(2, 1)
-    ax = gradient_bandit(k, ax, a=0.1, n_runs=n_runs, nonstationary=False)
-    ax = gradient_bandit(k, ax, a=0.1, n_runs=n_runs, kill_baseline=True, nonstationary=False)
+    ax, _ = gradient_bandit(k, ax, a=0.1, n_runs=n_runs, nonstationary=False)
+    ax, _ = gradient_bandit(k, ax, a=0.1, n_runs=n_runs, kill_baseline=True, nonstationary=False)
     plt.show()
 
+"""
+Nonassociative: No need to associate different actions with different states
+Associative (Contextual bandits): Associate different actions with different states but actions do not effect 
+future states.
 
+1. One state, finite actions (multi-armed bandit)
+2. Finite states, finite actions per state, actions do not determine state changes (Contextual bandit)
+3. Finite states, finite actions per state, actions do determine state changes (Markov Decision Process)
+"""
 
+"""
+Exercise 2.11: pg. 66, nonstationary version of Fig. 2.6 on pg. 64. This takes a long time to run.
+"""
+if True:
+    k = 10                              # Number of actions (arms)
 
+    n_runs = 1
+    timesteps = 200000                  # Number of timesteps for one run
+    nonstationary = True
 
+    f, ax = plt.subplots(2, 1)
 
+    data = {}
+    data['eps-greedy-average'] = np.zeros(6)
+    data['eps-greedy-constant'] = np.zeros(6)
+    data['gradient'] = np.zeros(8)
+    data['ucb'] = np.zeros(7)
+    data['optimistic'] = np.zeros(5)
 
+    # eps-greedy with a=0.1 and a=1/n
+    for i, eps in enumerate([1/128, 1/64, 1/32, 1/16, 1/8, 1/4]):
+        metrics = simple_bandit(k, ax, eps=eps, n_runs=n_runs,
+                                timesteps=timesteps, nonstationary=nonstationary, plot_on=False)
+        data['eps-greedy-average'][i] = np.mean(metrics['reward'][0, int(timesteps/2)::])
+
+        metrics = simple_bandit(k, ax, eps=eps, a=0.1, n_runs=n_runs,
+                                timesteps=timesteps, nonstationary=nonstationary, plot_on=False)
+        data['eps-greedy-constant'][i] = np.mean(metrics['reward'][0, int(timesteps/2)::])
+
+    # gradient bandit
+    for i, a in enumerate([1/32, 1/16, 1/8, 1/4, 1/2, 1, 2, 3]):
+        metrics = gradient_bandit(k, ax, a=a, n_runs=n_runs,
+                                  timesteps=timesteps, nonstationary=nonstationary, plot_on=False)
+        data['gradient'][i] = np.mean(metrics['reward'][0, int(timesteps/2)::])
+
+    # UCB
+    for i, c in enumerate([1/16, 1/8, 1/4, 1/2, 1, 2, 4]):
+        metrics = simple_bandit(k, ax, c=c, n_runs=n_runs,
+                                timesteps=timesteps, nonstationary=nonstationary, plot_on=False)
+        data['ucb'][i] = np.mean(metrics['reward'][0, int(timesteps / 2)::])
+
+    # Optimistic initialization with eps-greedy = 0.1 and constant step size a = 0.1
+    for i, Q1 in enumerate([1/4, 1/2, 1, 2, 4]):
+        metrics = simple_bandit(k, ax, eps=0.1, a=0.1, Q1=Q1, n_runs=n_runs,
+                                timesteps=timesteps, nonstationary=nonstationary, plot_on=False)
+        data['optimistic'][i] = np.mean(metrics['reward'][0, int(timesteps/2)::])
+
+    f, ax = plt.subplots()
+    ax.plot(np.log10([1/128, 1/64, 1/32, 1/16, 1/8, 1/4]), data['eps-greedy-average'], 'r-', label='eps-greedy')
+    ax.plot(np.log10([1/128, 1/64, 1/32, 1/16, 1/8, 1/4]), data['eps-greedy-constant'], 'r-', label='eps-greedy with constant')
+    ax.plot(np.log10([1/32, 1/16, 1/8, 1/4, 1/2, 1, 2, 3]), data['gradient'], 'g-', label='gradient bandit')
+    ax.plot(np.log10([1/16, 1/8, 1/4, 1/2, 1, 2, 4]), data['ucb'], 'b-', label='UCB')
+    ax.plot(np.log10([1/4, 1/2, 1, 2, 4]), data['optimistic'], 'k-', label='optimistic')
+    ax.set_xlabel('eps/a/c/Q1')
+    ax.set_ylabel('Average reward')
+    ax.legend()
+    plt.show()
