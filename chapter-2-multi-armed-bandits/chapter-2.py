@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 from environments import Bandit
 
 
+"""
+AGENTS
+"""
 def simple_bandit(k, ax, eps=0.0, a=0.0, Q1=0.0, c=0.0, nonstationary=False, n_runs=2000, timesteps=1000, plot_on=True):
     """
     A simple bandit algorithm (pg. 54)
@@ -13,13 +16,14 @@ def simple_bandit(k, ax, eps=0.0, a=0.0, Q1=0.0, c=0.0, nonstationary=False, n_r
     Nonstationary: rewards do change over time (want to give more weight to recent rewards)
     Upper confidence bound (ucb): Select greedy action taking into account the uncertainty around Q
 
-    Q (array): Estimated action values
-    Q1 (float): Initial estimate of Q
-    N (array): Number of times each action has been performed
-    A (int): Action to be taken
-    R (float): Reward
+    k: number of actions (arms)
+    Q (array): estimate at timestep t of action a
+    Q1 (float): Initial estimates for Q
+    N (array): Number of times action a has been selected prior to timestep t
+    A (int): Action to be selected
+    R (float): Reward from the environment
     a (float): alpha, constant step size parameter
-    eps (float): epsilon, probability to randomly explore
+    eps (float): epsilon, probability of taking a random action (exploration)
     """
     # Create a dictionary to store information about rewards received and actions taken
     metrics = {}
@@ -107,13 +111,16 @@ def gradient_bandit(k, ax, a=0.1, nonstationary=False, kill_baseline=False, n_ru
     """
     The gradient bandit algorithm (pg. 59), essentially stochastic gradient ascent.
 
-    H (array): Preference of selecting an action
-    pi (array): Probability of selecting an action (constructed by applying softmax() to H)
-    N (array): Number of times each action has been performed
-    A (int): Action to be taken
-    R (float): Reward
-    Rmean (float): Reward baseline, necessary for rewards not distributed from N(0,1)
+
+    k: number of actions (arms)
+    H (array): learned preference of slecting action a at timestep t
+    pi (array): probability of slection action a at timestep t (constructed by using softmax on H)
+    N (array): Number of times action a has been selected prior to timestep t
+    A (int): Action to be selected
+    R (float): Reward from the environment
+    Rmean (float): estimate at timestep t of the expected reward given pi
     a (float): alpha, constant step size parameter
+    eps (float): epsilon, probability of taking a random action (exploration)
     """
     # Create a dictionary to store information about rewards received and actions taken
     metrics = {}
@@ -134,7 +141,7 @@ def gradient_bandit(k, ax, a=0.1, nonstationary=False, kill_baseline=False, n_ru
         # Loop forever:
         for t in range(0, timesteps):
             # Calculate pi_t{A}, the probability of taking action A at timestep t using softmax
-            pi = np.exp(H)/np.sum(np.exp(H))
+            pi = np.exp(H+1e-6)/np.sum(np.exp(H+1e-6))  # avoid underflow
 
             # Select a random action using the probabilities in pi (this function seems slow for some reason)
             A = np.random.choice(k, 1, p=pi)
@@ -186,6 +193,9 @@ def gradient_bandit(k, ax, a=0.1, nonstationary=False, kill_baseline=False, n_ru
 
 
 """
+EXERCISES AND FIGURES
+"""
+"""
 Fig. 2.2: A simple bandit algorithm (pg. 54) for recreating Fig. 2.2 on pg. 51
 """
 if False:
@@ -199,7 +209,7 @@ if False:
 
 
 """
-Exercise 2.5: A simple bandit algorithm (pg. 54) for Excercise 2.5 on pg. 56 (nonstationary bandit problem)
+Exercise 2.5: A simple bandit algorithm (pg. 54) for Exercise 2.5 on pg. 56 (nonstationary bandit problem)
 Here the true action value randomly changes after each step (Real life applications are mostly nonstationary).
 """
 if False:
@@ -213,6 +223,7 @@ if False:
     ax, _ = simple_bandit(k, ax, eps=eps, n_runs=n_runs, timesteps=timesteps, nonstationary=True)
     ax, _ = simple_bandit(k, ax, eps=eps, a=0.1, n_runs=n_runs, timesteps=timesteps, nonstationary=True)
     plt.show()
+
 
 
 """
@@ -274,11 +285,11 @@ future states.
 """
 Exercise 2.11: pg. 66, nonstationary version of Fig. 2.6 on pg. 64. This takes a long time to run.
 """
-if True:
+if False:
     k = 10                              # Number of actions (arms)
 
-    n_runs = 1
-    timesteps = 200000                  # Number of timesteps for one run
+    n_runs = 100
+    timesteps = 1000                    # Number of timesteps for one run
     nonstationary = True
 
     f, ax = plt.subplots(2, 1)
@@ -319,11 +330,16 @@ if True:
         data['optimistic'][i] = np.mean(metrics['reward'][0, int(timesteps/2)::])
 
     f, ax = plt.subplots()
-    ax.plot(np.log10([1/128, 1/64, 1/32, 1/16, 1/8, 1/4]), data['eps-greedy-average'], 'r-', label='eps-greedy')
-    ax.plot(np.log10([1/128, 1/64, 1/32, 1/16, 1/8, 1/4]), data['eps-greedy-constant'], 'r-', label='eps-greedy with constant')
-    ax.plot(np.log10([1/32, 1/16, 1/8, 1/4, 1/2, 1, 2, 3]), data['gradient'], 'g-', label='gradient bandit')
-    ax.plot(np.log10([1/16, 1/8, 1/4, 1/2, 1, 2, 4]), data['ucb'], 'b-', label='UCB')
-    ax.plot(np.log10([1/4, 1/2, 1, 2, 4]), data['optimistic'], 'k-', label='optimistic')
+    ax.plot(np.log10([1/128, 1/64, 1/32, 1/16, 1/8, 1/4]), data['eps-greedy-average'],
+            'r-', label='eps-greedy')
+    ax.plot(np.log10([1/128, 1/64, 1/32, 1/16, 1/8, 1/4]), data['eps-greedy-constant'],
+            'r-', label='eps-greedy with constant')
+    ax.plot(np.log10([1/32, 1/16, 1/8, 1/4, 1/2, 1, 2, 3]), data['gradient'],
+            'g-', label='gradient bandit')
+    ax.plot(np.log10([1/16, 1/8, 1/4, 1/2, 1, 2, 4]), data['ucb'],
+            'b-', label='UCB')
+    ax.plot(np.log10([1/4, 1/2, 1, 2, 4]), data['optimistic'],
+            'k-', label='optimistic')
     ax.set_xlabel('eps/a/c/Q1')
     ax.set_ylabel('Average reward')
     ax.legend()

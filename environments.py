@@ -24,8 +24,10 @@ class Bandit:
     def step(self, a):
         """
         Take action and return the reward.
-        :param a: (int) Action to be completed, aka the arm to select.
-        :return: Reward for that action.
+
+        Attributes:
+            a (int): Action to be completed, aka the arm to select.
+            r (float): Reward for that action.
         """
 
         if -1 < a < self.k:  # Check if the selected action is in-bounds
