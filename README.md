@@ -1,6 +1,6 @@
 # Reinforcement Learning
 
-Implementation of exercises and recreation of figures from *Reinforcement Learning: An Introduction* by Richard Sutton and Andrew Barto (http://www.incompleteideas.net/book/the-book-2nd.html). All page numbers refer to the absolute page.
+Implementation of exercises and recreation of figures from *Reinforcement Learning: An Introduction* by Richard Sutton and Andrew Barto (http://www.incompleteideas.net/book/the-book-2nd.html). All page numbers refer to the absolute page. Implemented using python 3.6.7, numpy 1.15.4, and matplotlib 2.2.2.
 
 ### List of Exercises and Figures
 2. Multi-armed Bandits

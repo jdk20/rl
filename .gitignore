@@ -51,5 +51,6 @@
 *.idlk
 *.pth
 *.npy
+scratch.m
 __pycache__/
 .idea/
