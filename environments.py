@@ -3,7 +3,8 @@ import numpy as np
 
 class Bandit:
     """
-    Enviroment with only one state and k actions. Often described as a slot machine (bandit) with k arms (levers).
+    Chapter 2
+    Environment with only one state and k actions. Often described as a slot machine (bandit) with k arms (levers).
     inputs: (k, sigma_q, sigma_r)
     output: (r)
 
@@ -40,3 +41,94 @@ class Bandit:
 
         return r
 
+
+class GridWorld:
+    """
+    Chapter 4: Dynamic Programming
+
+    Rectangle Grid World creation, pass indexes containing terminal states of unreachable states. Assume four cardinal
+    directions (north, south, east, west) and all transitions have the same reward.
+
+    Attributes:
+        size (list): Height and width of the gridworld, giving height*width cells (each cell containing one state)
+        r (float): Reward for transitions around the gridworld (assume all transitions are R for now)
+                    Improvement: dictionary[s][a] = list[r]
+        a (list): Actions applied to all cells in the gridworld (assume all cells have the same actions)
+                 Improvement: dictionary[s] = list[a]
+        unreachable (matrix): x,y- coordinates of unreachable states that should be eliminated from the gridworld
+    """
+    def __init__(self, size, r, terminal=np.array([0, 0]), unreachable=np.array([False])):
+        super().__init__()
+        self.height = size[0]
+        self.width = size[1]
+        self.r = r
+
+        # Create gridworld with empty GridCell()
+        self.gridworld = np.empty((self.height, self.width), dtype=object)
+        for i in range(0, self.height):
+            for j in range(0, self.width):
+                self.gridworld[i, j] = GridCell()
+
+        # Set unreachable GridCell locations to False
+        if unreachable.any():
+            for i in range(0, unreachable.shape[0]):
+                self.gridworld[unreachable[i, 0], unreachable[i, 1]] = False
+
+        # Set any terminal states
+        Splus = GridCell()
+        Splus.is_terminal = True
+        for i in range(0, terminal.shape[0]):
+            self.gridworld[terminal[i, 0], terminal[i, 1]] = Splus  # Pointer to a single S+ object
+
+        # Reiterate over gridworld and set appropriate GridCell parameters
+        for i in range(0, self.height):
+            for j in range(0, self.width):
+                # Check if reachable
+                if self.gridworld[i, j]:
+                    # Use string names to denote actions for interpretability
+                    self.gridworld[i, j].a = ['north', 'south', 'east', 'west']
+
+                    # Set action->new_state transitions and action-rewards
+                    for _, a in enumerate(self.gridworld[i, j].a):
+                        if a is 'north':
+                            if (i-1) >= 0 and self.gridworld[i-1, j]:
+                                self.gridworld[i, j].sn[a] = self.gridworld[i-1, j]  # Pointer to accessible states
+                                self.gridworld[i, j].r[a] = self.r  # Assume reward is constant for all actions/states
+                                self.gridworld[i, j].p[a] = 1.0  # Keep it deterministic
+                        elif a is 'south':
+                            if (i+1) < self.height and self.gridworld[i+1, j]:
+                                self.gridworld[i, j].sn[a] = self.gridworld[i+1, j]
+                                self.gridworld[i, j].r[a] = self.r
+                                self.gridworld[i, j].p[a] = 1.0
+                        elif a is 'east':
+                            if (j+1) < self.width and self.gridworld[i, j+1]:
+                                self.gridworld[i, j].sn[a] = self.gridworld[i, j+1]
+                                self.gridworld[i, j].r[a] = self.r
+                                self.gridworld[i, j].p[a] = 1.0
+                        elif a is 'west':
+                            if (j-1) >= 0 and self.gridworld[i, j-1]:
+                                self.gridworld[i, j].sn[a] = self.gridworld[i, j-1]
+                                self.gridworld[i, j].r[a] = self.r
+                                self.gridworld[i, j].p[a] = 1.0
+
+
+class GridCell:
+    """
+    Chapter 4: Dynamic Programming
+
+    Each GridCell instance represents a unique state, and contains information on what rewards, actions,
+    and other states are accessible (probability>0).
+
+    Attributes:
+        sn (dict): sn[action] = object, List possible states (sn=s') that can reached from this state
+        a (array): List of possible actions from this state
+        r (dict): r[action] = reward, Reward for all possible actions from this state
+        p (dict): 4D matrix containing probabilities for p(sn | a) (no dependence on r or s)
+        is_terminal (bool): Denoting if this cell is the terminal state S+
+    """
+    def __init__(self):
+        self.sn = {}
+        self.a = 0
+        self.r = {}
+        self.p = {}
+        self.is_terminal = False
