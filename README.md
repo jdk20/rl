@@ -9,6 +9,8 @@ Implementation of exercises and recreation of figures from *Reinforcement Learni
 	* Simple eps-greedy and alpha Bandit Algorithm, Optimistic value initialization, Stationary environment (Fig 2.3 on pg. 56)
 	* Simple Upper Confidence Bound Bandit Algorithm, Stationary environment (Fig. 2.4 on pg. 58)
 	* Gradient Bandit, Stationary environment (Fig. 2.5 on pg. 60)
-	* Nonstationary version of Fig. 2.6 on pg. 64 (Exercise 2.11)
+	* Nonstationary version of Fig. 2.6 on pg. 64 (Exercise 2.11 on pg. 66)
 3. Finite Markov Decision Processes
+    * No programming questions
 4. Dynamic Programming
+    * Iterative Policy Evaluation/Prediction for estimating V (pg. 97)

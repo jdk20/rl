@@ -87,29 +87,48 @@ class GridWorld:
                 if self.gridworld[i, j]:
                     # Use string names to denote actions for interpretability
                     self.gridworld[i, j].a = ['north', 'south', 'east', 'west']
+                    self.gridworld[i, j].r = self.r  # Assume reward is constant for all actions/states
 
                     # Set action->new_state transitions and action-rewards
                     for _, a in enumerate(self.gridworld[i, j].a):
                         if a is 'north':
                             if (i-1) >= 0 and self.gridworld[i-1, j]:
-                                self.gridworld[i, j].sn[a] = self.gridworld[i-1, j]  # Pointer to accessible states
-                                self.gridworld[i, j].r[a] = self.r  # Assume reward is constant for all actions/states
+                                self.gridworld[i, j].sn.append(self.gridworld[i-1, j])  # Pointer to accessible states
                                 self.gridworld[i, j].p[a] = 1.0  # Keep it deterministic
+                            else:
+                                # Transition off the grid possible but leads to remaining in the same state
+                                self.gridworld[i, j].sn.append(self.gridworld[i, j])
+                                self.gridworld[i, j].p[a] = 1.0
                         elif a is 'south':
                             if (i+1) < self.height and self.gridworld[i+1, j]:
-                                self.gridworld[i, j].sn[a] = self.gridworld[i+1, j]
-                                self.gridworld[i, j].r[a] = self.r
+                                self.gridworld[i, j].sn.append(self.gridworld[i+1, j])
+                                self.gridworld[i, j].p[a] = 1.0
+                            else:
+                                self.gridworld[i, j].sn.append(self.gridworld[i, j])
                                 self.gridworld[i, j].p[a] = 1.0
                         elif a is 'east':
                             if (j+1) < self.width and self.gridworld[i, j+1]:
-                                self.gridworld[i, j].sn[a] = self.gridworld[i, j+1]
-                                self.gridworld[i, j].r[a] = self.r
+                                self.gridworld[i, j].sn.append(self.gridworld[i, j+1])
+                                self.gridworld[i, j].p[a] = 1.0
+                            else:
+                                self.gridworld[i, j].sn.append(self.gridworld[i, j])
                                 self.gridworld[i, j].p[a] = 1.0
                         elif a is 'west':
                             if (j-1) >= 0 and self.gridworld[i, j-1]:
-                                self.gridworld[i, j].sn[a] = self.gridworld[i, j-1]
-                                self.gridworld[i, j].r[a] = self.r
+                                self.gridworld[i, j].sn.append(self.gridworld[i, j-1])
                                 self.gridworld[i, j].p[a] = 1.0
+                            else:
+                                self.gridworld[i, j].sn.append(self.gridworld[i, j])
+                                self.gridworld[i, j].p[a] = 1.0
+
+    def print_values(self, k):
+        print(k)
+        for i in range(0, self.height):
+            v = '| '
+            for j in range(0, self.width):
+                v += str(np.round(self.gridworld[i, j].v, 1)) + ' | '
+            print(v)
+        print('\n')
 
 
 class GridCell:
@@ -120,15 +139,17 @@ class GridCell:
     and other states are accessible (probability>0).
 
     Attributes:
-        sn (dict): sn[action] = object, List possible states (sn=s') that can reached from this state
+        sn (list): List possible states (sn=s') that can reached from this state
         a (array): List of possible actions from this state
-        r (dict): r[action] = reward, Reward for all possible actions from this state
+        r (float): Reward for all possible actions from this state
         p (dict): 4D matrix containing probabilities for p(sn | a) (no dependence on r or s)
+        v (float): Estimated value of the state
         is_terminal (bool): Denoting if this cell is the terminal state S+
     """
     def __init__(self):
-        self.sn = {}
+        self.sn = []
         self.a = 0
-        self.r = {}
+        self.r = 0.0
         self.p = {}
+        self.v = 0.0
         self.is_terminal = False
