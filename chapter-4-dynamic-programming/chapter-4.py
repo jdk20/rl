@@ -42,7 +42,7 @@ def iterative_policy_evaluation(g, pi, gamma=0.9, theta=0.1, verbose=False):
                         # p(s',r|s,a) = g.gridworld[i, j].p[a]
                         # r = sn.r
                         # V(s') = sn.v
-                        temp_2 += (g.gridworld[i, j].p['north'] * (sn.r + (gamma*sn.v)))
+                        temp_2 += (g.gridworld[i, j].p['left'] * (sn.r + (gamma*sn.v)))
 
                     # pi(a|s) = pi[a]
                     temp_1 += 0.25*temp_2
@@ -73,7 +73,7 @@ reward = -1
 terminal_states = np.array([[0, 0], [3, 3]])
 
 # Assume all actions are equally probably and all states have the same actions
-pi = {'north': 0.25, 'south': 0.25, 'east': 0.25, 'west': 0.25}
+pi = {'up': 0.25, 'down': 0.25, 'right': 0.25, 'left': 0.25}
 g = GridWorld([height, width], reward, terminal=terminal_states)
 
 iterative_policy_evaluation(g, pi, gamma=1.0, theta=0.1, verbose=True)

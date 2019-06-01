@@ -47,7 +47,7 @@ class GridWorld:
     Chapter 4: Dynamic Programming
 
     Rectangle Grid World creation, pass indexes containing terminal states of unreachable states. Assume four cardinal
-    directions (north, south, east, west) and all transitions have the same reward.
+    directions (up, down, right, left) and all transitions have the same reward.
 
     Attributes:
         size (list): Height and width of the gridworld, giving height*width cells (each cell containing one state)
@@ -86,12 +86,12 @@ class GridWorld:
                 # Check if reachable
                 if self.gridworld[i, j]:
                     # Use string names to denote actions for interpretability
-                    self.gridworld[i, j].a = ['north', 'south', 'east', 'west']
+                    self.gridworld[i, j].a = ['up', 'down', 'right', 'left']  # Actions are always possible
                     self.gridworld[i, j].r = self.r  # Assume reward is constant for all actions/states
 
                     # Set action->new_state transitions and action-rewards
                     for _, a in enumerate(self.gridworld[i, j].a):
-                        if a is 'north':
+                        if a is 'up':
                             if (i-1) >= 0 and self.gridworld[i-1, j]:
                                 self.gridworld[i, j].sn.append(self.gridworld[i-1, j])  # Pointer to accessible states
                                 self.gridworld[i, j].p[a] = 1.0  # Keep it deterministic
@@ -99,21 +99,21 @@ class GridWorld:
                                 # Transition off the grid possible but leads to remaining in the same state
                                 self.gridworld[i, j].sn.append(self.gridworld[i, j])
                                 self.gridworld[i, j].p[a] = 1.0
-                        elif a is 'south':
+                        elif a is 'down':
                             if (i+1) < self.height and self.gridworld[i+1, j]:
                                 self.gridworld[i, j].sn.append(self.gridworld[i+1, j])
                                 self.gridworld[i, j].p[a] = 1.0
                             else:
                                 self.gridworld[i, j].sn.append(self.gridworld[i, j])
                                 self.gridworld[i, j].p[a] = 1.0
-                        elif a is 'east':
+                        elif a is 'right':
                             if (j+1) < self.width and self.gridworld[i, j+1]:
                                 self.gridworld[i, j].sn.append(self.gridworld[i, j+1])
                                 self.gridworld[i, j].p[a] = 1.0
                             else:
                                 self.gridworld[i, j].sn.append(self.gridworld[i, j])
                                 self.gridworld[i, j].p[a] = 1.0
-                        elif a is 'west':
+                        elif a is 'left':
                             if (j-1) >= 0 and self.gridworld[i, j-1]:
                                 self.gridworld[i, j].sn.append(self.gridworld[i, j-1])
                                 self.gridworld[i, j].p[a] = 1.0
